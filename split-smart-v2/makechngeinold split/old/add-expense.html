@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Expense</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <h2>Add New Expense</h2>
+    <form id="expenseForm">
+      <input type="text" id="item" placeholder="Item Name" required />
+      <input type="number" id="amount" placeholder="Amount (₹)" required />
+      <input type="text" id="category" placeholder="Category" required />
+      <select id="paidBy">
+        <option value="">Who Paid?</option>
+        <option value="Anmol">Anmol Pandey</option>
+        <option value="Pinki Mishra">Pinki Mishra</option>
+        <option value="Bhumi">Bhumi</option>
+      </select>
+      <fieldset>
+        <legend>Split Between:</legend>
+        <label><input type="checkbox" name="participants" value="Anmol" checked> Anmol</label>
+        <label><input type="checkbox" name="participants" value="Pinki Mishra" checked> Pinki Mishra</Main></label>
+        <label><input type="checkbox" name="participants" value="Bhumi" checked> Bhumi</label>
+      </fieldset>
+      <button type="submit">Add Expense</button>
+    </form>
+
+    <h3>Expense History</h3>
+    <label>Filter by Person: <input type="text" id="filterPerson" /></label>
+    <label>Filter by Category: <input type="text" id="filterCategory" /></label>
+    <label>From: <input type="date" id="fromDate" /> To: <input type="date" id="toDate" /></label>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="clearExpenses()">Delete All History</button>
+    <div id="expenseHistory"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('expenseForm');
+    const historyDiv = document.getElementById('expenseHistory');
+    let currentUser = "Anmol"; // for demo
+
+    function loadHistory() {
+      const expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+      const person = document.getElementById('filterPerson').value.toLowerCase();
+      const category = document.getElementById('filterCategory').value.toLowerCase();
+      const from = new Date(document.getElementById('fromDate').value);
+      const to = new Date(document.getElementById('toDate').value);
+      historyDiv.innerHTML = "";
+
+      expenses.forEach((exp, index) => {
+        const expDate = new Date(exp.dateTime);
+        if (
+          (!person || exp.paidBy.toLowerCase().includes(person) || exp.participants.join(", ").toLowerCase().includes(person)) &&
+          (!category || exp.category.toLowerCase().includes(category)) &&
+          (!from.getTime() || expDate >= from) &&
+          (!to.getTime() || expDate <= to)
+        ) {
+          const row = document.createElement("div");
+          row.className = "expense-row";
+          row.innerHTML = `<strong>${index + 1}. ${exp.item}</strong> — ₹${exp.amount} [${exp.category}] paid by <strong>${exp.paidBy}</strong> on <em>${exp.dateTime}</em><br>Split: ${exp.participants.join(", ")} — Each: ₹${exp.share}`;
+
+          if (exp.paidBy === currentUser) {
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "🗑️ Delete";
+            delBtn.onclick = () => {
+              expenses.splice(index, 1);
+              localStorage.setItem("expenses", JSON.stringify(expenses));
+              loadHistory();
+            };
+            row.appendChild(delBtn);
+          }
+
+          historyDiv.appendChild(row);
+          historyDiv.appendChild(document.createElement("hr"));
+        }
+      });
+    }
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const item = document.getElementById("item").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const category = document.getElementById("category").value;
+      const paidBy = document.getElementById("paidBy").value;
+      const participants = Array.from(document.querySelectorAll('input[name="participants"]:checked')).map(cb => cb.value);
+      const dateTime = new Date().toLocaleString();
+      const share = (amount / participants.length).toFixed(2);
+
+      const expense = { item, amount, category, paidBy, participants, share, dateTime };
+      const expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+      expenses.push(expense);
+      localStorage.setItem("expenses", JSON.stringify(expenses));
+      form.reset();
+      loadHistory();
+    });
+
+    function exportCSV() {
+      const expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+      let csv = "Item,Amount,Category,PaidBy,Participants,Share,DateTime\n";
+      expenses.forEach(exp => {
+        csv += `${exp.item},${exp.amount},${exp.category},${exp.paidBy},"${exp.participants.join("-")}",${exp.share},${exp.dateTime}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "expenses.csv";
+      a.click();
+    }
+
+    function clearExpenses() {
+      if (confirm("Are you sure you want to delete all expenses?")) {
+        localStorage.removeItem("expenses");
+        loadHistory();
+      }
+    }
+
+    document.getElementById("filterPerson").addEventListener("input", loadHistory);
+    document.getElementById("filterCategory").addEventListener("input", loadHistory);
+    document.getElementById("fromDate").addEventListener("change", loadHistory);
+    document.getElementById("toDate").addEventListener("change", loadHistory);
+
+    loadHistory();
+  </script>
+</body>
+</html>

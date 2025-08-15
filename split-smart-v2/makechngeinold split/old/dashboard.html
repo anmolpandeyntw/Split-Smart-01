@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - SplitSmart</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            
+            <div class="right">
+                <ul>
+                    <li><span>  <a href="login.html">Login</a>
+</span>
+                           
+                    </li>
+                    <li><span><a href="dashboard.html">Dashboard</a></span>
+                    </li>
+                    <li><span> <a href="add-expense.html">Add Expense</a> </span>
+                    </li>
+                    <li><span>About Us </span>
+                    </li>
+                    <li>
+                    
+            </div>
+
+            </li>
+            </ul>
+            </div>
+        </nav>
+    </header>
+
+        <h1>Welcome to SplitSmart Dashboard</h1>
+        <p>Manage your expenses efficiently with our easy-to-use dashboard.</p>
+        <nav>
+            <ul>
+                <section class="second">
+          
+       
+        <div class="grid">
+            <div class="item">
+                <div class="item-lang">English</div>
+                <button class="btn blue"><a href="add-expense.html">Add Expense</a></button>
+                <button class="btn blue"><a href="add-expense.html">Add Expense</a></button>
+            </div>
+            <div class="item">
+                <div class="item-lang">English</div>
+                <button class="btn blue"> <a href="login.html">Login</a></button>
+                <button class="btn blue"> <a href="login.html">Login</a></button>
+            </div>
+            </ul>
+        </nav>
+
+  <div class="container">
+    <h2>Dashboard Summary</h2>
+    <div id="summary"></div>
+    <button onclick="downloadCSV()">Download CSV</button>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html>
